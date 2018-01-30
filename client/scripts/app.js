@@ -1,5 +1,5 @@
 var Movie = Backbone.Model.extend({
-
+// Done!
   defaults: {
     like: true
   },
@@ -11,22 +11,84 @@ var Movie = Backbone.Model.extend({
 
 });
 
+///////////////////////////////////////////////////////////////////
+
 var Movies = Backbone.Collection.extend({
 
   model: Movie,
 
   initialize: function() {
-    // your code here
+    this.on('change:like', this.sort, this);
   },
 
   comparator: 'title',
 
   sortByField: function(field) {
-    // your code here
+    this.comparator = field;
+    this.sort();
   }
 
 });
 
+
+///////////////////////////////////////////////////////////////////
+// Done!
+var MovieView = Backbone.View.extend({
+
+  template: _.template('<div class="movie"> \
+                          <div class="like"> \
+                            <button><img src="images/<%- like ? \'up\' : \'down\' %>.jpg"></button> \
+                          </div> \
+                          <span class="title"><%- title %></span> \
+                          <span class="year">(<%- year %>)</span> \
+                          <div class="rating">Fan rating: <%- rating %> of 10</div> \
+                        </div>'),
+
+  initialize: function() {
+    // your code here
+    this.listenTo(this.model, 'change', this.render);
+  },
+
+  events: {
+    'click button': 'handleClick'
+  },
+
+  handleClick: function(e) {
+    // your code here
+    this.model.toggleLike();
+  },
+
+  render: function() {
+    this.$el.html(this.template(this.model.attributes));
+    return this.$el;
+  }
+
+});
+
+///////////////////////////////////////////////////////////////////
+var MoviesView = Backbone.View.extend({
+
+  initialize: function() {
+    // your code here
+    this.listenTo(this.collection, 'sort', this.render);
+  },
+
+  render: function() {
+    this.$el.empty();
+    this.collection.forEach(this.renderMovie, this);
+  },
+
+  renderMovie: function(movie) {
+    var movieView = new MovieView({model: movie});
+    this.$el.append(movieView.render());
+  }
+
+});
+
+
+///////////////////////////////////////////////////////////////////
+// Moved to the bottem since don't have to edit 
+// doesn't change functionality
 var AppView = Backbone.View.extend({
 
   events: {
@@ -47,50 +109,3 @@ var AppView = Backbone.View.extend({
 
 });
 
-var MovieView = Backbone.View.extend({
-
-  template: _.template('<div class="movie"> \
-                          <div class="like"> \
-                            <button><img src="images/<%- like ? \'up\' : \'down\' %>.jpg"></button> \
-                          </div> \
-                          <span class="title"><%- title %></span> \
-                          <span class="year">(<%- year %>)</span> \
-                          <div class="rating">Fan rating: <%- rating %> of 10</div> \
-                        </div>'),
-
-  initialize: function() {
-    // your code here
-  },
-
-  events: {
-    'click button': 'handleClick'
-  },
-
-  handleClick: function() {
-    // your code here
-  },
-
-  render: function() {
-    this.$el.html(this.template(this.model.attributes));
-    return this.$el;
-  }
-
-});
-
-var MoviesView = Backbone.View.extend({
-
-  initialize: function() {
-    // your code here
-  },
-
-  render: function() {
-    this.$el.empty();
-    this.collection.forEach(this.renderMovie, this);
-  },
-
-  renderMovie: function(movie) {
-    var movieView = new MovieView({model: movie});
-    this.$el.append(movieView.render());
-  }
-
-});
